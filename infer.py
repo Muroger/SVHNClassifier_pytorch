@@ -7,7 +7,7 @@ from torchvision import transforms
 from model import Model
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--checkpoint', type=str, required=True, help='path to checkpoint, e.g. ./logs/model-100.pth')
+parser.add_argument('-c', '--checkpoint', type=str, required=True, help='path to checkpoint, e.g. ./logs/model-71000.pth')
 parser.add_argument('input', type=str, help='path to input image')
 
 
@@ -32,14 +32,16 @@ def _infer(path_to_checkpoint_file, path_to_input_image):
         length_logits, digit1_logits, digit2_logits, digit3_logits, digit4_logits, digit5_logits = model.eval()(images)
 
         length_prediction = length_logits.max(1)[1]
+        preds = []
         digit1_prediction = digit1_logits.max(1)[1]
         digit2_prediction = digit2_logits.max(1)[1]
         digit3_prediction = digit3_logits.max(1)[1]
         digit4_prediction = digit4_logits.max(1)[1]
         digit5_prediction = digit5_logits.max(1)[1]
-
+        preds = [digit1_prediction.item(),digit2_prediction.item(),digit3_prediction.item(),digit4_prediction.item(), digit5_prediction.item()]
         print('length:', length_prediction.item())
-        print('digits:', digit1_prediction.item(), digit2_prediction.item(), digit3_prediction.item(), digit4_prediction.item(), digit5_prediction.item())
+        print('digits:', preds[:length_prediction.item()])
+        #print('digits:', digit1_prediction.item(), digit2_prediction.item(), digit3_prediction.item(), digit4_prediction.item(), digit5_prediction.item())
 
 
 def main(args):

@@ -155,20 +155,20 @@ def main(args):
     path_to_test_lmdb_dir = os.path.join(args.data_dir, 'test.lmdb')
     path_to_lmdb_meta_file = os.path.join(args.data_dir, 'lmdb_meta.json')
 
-    for path_to_dir in [path_to_train_lmdb_dir, path_to_val_lmdb_dir, path_to_test_lmdb_dir]:
-        assert not os.path.exists(path_to_dir), 'LMDB directory %s already exists' % path_to_dir
+    #for path_to_dir in [path_to_train_lmdb_dir, path_to_val_lmdb_dir, path_to_test_lmdb_dir]:
+    #    assert not os.path.exists(path_to_dir), 'LMDB directory %s already exists' % path_to_dir
 
     print('Processing training and validation data...')
-    [num_train_examples, num_val_examples] = convert_to_lmdb([(path_to_train_dir, path_to_train_digit_struct_mat_file),
-                                                              (path_to_extra_dir, path_to_extra_digit_struct_mat_file)],
-                                                             [path_to_train_lmdb_dir, path_to_val_lmdb_dir],
-                                                             lambda paths: 0 if random.random() > 0.1 else 1)
+    [num_train_examples] = convert_to_lmdb([(path_to_train_dir, path_to_train_digit_struct_mat_file)],
+                                                              #(path_to_extra_dir, path_to_extra_digit_struct_mat_file)],
+                                                             [path_to_train_lmdb_dir],#, path_to_val_lmdb_dir],
+                                                             lambda paths: 0)
     print('Processing test data...')
-    [num_test_examples] = convert_to_lmdb([(path_to_test_dir, path_to_test_digit_struct_mat_file)],
-                                          [path_to_test_lmdb_dir],
-                                          lambda paths: 0)
+    # [num_test_examples] = convert_to_lmdb([(path_to_test_dir, path_to_test_digit_struct_mat_file)],
+    #                                       [path_to_test_lmdb_dir],
+    #                                       lambda paths: 0)
 
-    create_lmdb_meta_file(num_train_examples, num_val_examples, num_test_examples, path_to_lmdb_meta_file)
+    create_lmdb_meta_file(num_train_examples, path_to_lmdb_meta_file)#, num_val_examples, num_test_examples, path_to_lmdb_meta_file)
 
     print('Done')
 

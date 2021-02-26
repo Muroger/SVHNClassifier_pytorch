@@ -15,16 +15,24 @@ from dataset import Dataset
 from evaluator import Evaluator
 from model import Model
 
+from albumentations import (
+    HorizontalFlip, VerticalFlip, IAAPerspective, ShiftScaleRotate, CLAHE, RandomRotate90,
+    Transpose, ShiftScaleRotate, Blur, OpticalDistortion, GridDistortion, HueSaturationValue,
+    IAAAdditiveGaussianNoise, GaussNoise, MotionBlur, MedianBlur, IAAPiecewiseAffine, RandomResizedCrop,
+    IAASharpen, IAAEmboss, RandomBrightnessContrast, Flip, OneOf, Compose, Normalize, Cutout, CoarseDropout, ShiftScaleRotate, CenterCrop, Resize
+)
+from albumentations.pytorch import ToTensorV2
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--data_dir', default='./data', help='directory to read LMDB files')
 parser.add_argument('-l', '--logdir', default='./logs', help='directory to write logs')
 parser.add_argument('-r', '--restore_checkpoint', default=None,
                     help='path to restore checkpoint, e.g. ./logs/model-100.pth')
-parser.add_argument('-bs', '--batch_size', default=32, type=int,  help='Default 32')
-parser.add_argument('-lr', '--learning_rate', default=1e-2, type=float, help='Default 1e-2')
+parser.add_argument('-bs', '--batch_size', default=96, type=int,  help='Default 92')
+parser.add_argument('-lr', '--learning_rate', default=1e-3, type=float, help='Default 1e-3')
 parser.add_argument('-p', '--patience', default=100, type=int, help='Default 100, set -1 to train infinitely')
-parser.add_argument('-ds', '--decay_steps', default=10000, type=int, help='Default 10000')
-parser.add_argument('-dr', '--decay_rate', default=0.9, type=float, help='Default 0.9')
+parser.add_argument('-ds', '--decay_steps', default=5000, type=int, help='Default 500')
+parser.add_argument('-dr', '--decay_rate', default=0.8, type=float, help='Default 0.8')
 
 
 def _loss(length_logits, digit1_logits, digit2_logits, digit3_logits, digit4_logits, digit5_logits, length_labels, digits_labels):
@@ -52,18 +60,23 @@ def _train(path_to_train_lmdb_dir, path_to_val_lmdb_dir, path_to_log_dir,
     duration = 0.0
 
     model = Model()
+    #print(model)
     model.cuda()
 
     transform = transforms.Compose([
         transforms.RandomCrop([54, 54]),
         transforms.ToTensor(),
+        transforms.ColorJitter(
+            brightness=63.0 / 255.0, saturation=[0.5, 1.5], contrast=[0.2, 1.8]
+        ),
         transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
     ])
     train_loader = torch.utils.data.DataLoader(Dataset(path_to_train_lmdb_dir, transform),
                                                batch_size=batch_size, shuffle=True,
                                                num_workers=4, pin_memory=True)
     evaluator = Evaluator(path_to_val_lmdb_dir)
-    optimizer = optim.SGD(model.parameters(), lr=initial_learning_rate, momentum=0.9, weight_decay=0.0005)
+    #optimizer = optim.SGD(model.parameters(), lr=initial_learning_rate, momentum=0.9, weight_decay=0.0005)
+    optimizer = optim.Adam(model.parameters(), lr=initial_learning_rate, weight_decay=1e-6)
     scheduler = StepLR(optimizer, step_size=training_options['decay_steps'], gamma=training_options['decay_rate'])
 
     if path_to_restore_checkpoint_file is not None:
@@ -81,11 +94,13 @@ def _train(path_to_train_lmdb_dir, path_to_val_lmdb_dir, path_to_log_dir,
     while True:
         for batch_idx, (images, length_labels, digits_labels) in enumerate(train_loader):
             start_time = time.time()
+
+            optimizer.zero_grad()
             images, length_labels, digits_labels = images.cuda(), length_labels.cuda(), [digit_labels.cuda() for digit_labels in digits_labels]
             length_logits, digit1_logits, digit2_logits, digit3_logits, digit4_logits, digit5_logits = model.train()(images)
             loss = _loss(length_logits, digit1_logits, digit2_logits, digit3_logits, digit4_logits, digit5_logits, length_labels, digits_labels)
 
-            optimizer.zero_grad()
+            
             loss.backward()
             optimizer.step()
             scheduler.step()
