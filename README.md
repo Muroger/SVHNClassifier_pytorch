@@ -2,38 +2,8 @@
 
 A PyTorch implementation of [Multi-digit Number Recognition from Street View Imagery using Deep Convolutional Neural Networks](http://arxiv.org/pdf/1312.6082.pdf) 
 
-> If you're interested in C++ inference, move [HERE](cpp)
+[Original](https://github.com/potterhsu/SVHNClassifier-PyTorch)
 
-## Results
-
-<table>
-    <tr>
-        <th>Steps</th>
-        <th>GPU</th>
-        <th>Batch Size</th>
-        <th>Learning Rate</th>
-        <th>Patience</th>
-        <th>Decay Step</th>
-        <th>Decay Rate</th>
-        <th>Training Speed (FPS)</th>
-        <th>Accuracy</th>
-    </tr>
-    <tr>
-        <td>
-            <a href="https://drive.google.com/open?id=1DSg3F5GpouEvU9n7YSPdUKH1CSmkdwSw">
-                54000
-            </a>
-        </td>
-        <td>GTX 1080 Ti</td>
-        <td>512</td>
-        <td>0.16</td>
-        <td>100</td>
-        <td>625</td>
-        <td>0.9</td>
-        <td>~1700</td>
-        <td>95.65%</td>
-    </tr>
-</table>
 
 ### Sample
 
@@ -62,11 +32,13 @@ digits: 1 9 0 10 10
 * torch 1.0
 * torchvision 0.2.1
 * visdom
+
     ```
     $ pip install visdom
     ```
     
 * h5py
+
     ```
     In Ubuntu:
     $ sudo apt-get install libhdf5-dev
@@ -74,27 +46,22 @@ digits: 1 9 0 10 10
     ```
 
 * protobuf
+
     ```
     $ pip install protobuf
     ```
 
 * lmdb
+
     ```
     $ pip install lmdb
     ```
 
 ## Setup
 
-1. Clone the source code
+1. Download [SVHN Dataset](http://ufldl.stanford.edu/housenumbers/) format 1
 
-    ```
-    $ git clone https://github.com/potterhsu/SVHNClassifier-PyTorch
-    $ cd SVHNClassifier-PyTorch
-    ```
-
-2. Download [SVHN Dataset](http://ufldl.stanford.edu/housenumbers/) format 1
-
-3. Extract to data folder, now your folder structure should be like below:
+2. Extract to data folder, now your folder structure should be like below:
     ```
     SVHNClassifier
         - data
