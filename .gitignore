@@ -1,7 +1,7 @@
 .idea
 .ipynb_checkpoints
 *.pyc
-data/*
-logs/*
-logs_retrain/*
-cpp/*
+data/
+logs/
+logs_retrain/
+cpp/
